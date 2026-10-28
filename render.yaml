@@ -3,7 +3,7 @@ services:
     name: fc26-position-finder
     runtime: node
     plan: starter
-    buildCommand: npm ci
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     disk:
