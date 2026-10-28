@@ -22,5 +22,5 @@ This adds a Node/Express backend and SQLite-backed admin portal. GitHub Pages al
 
 ## Important migration notes
 - The static GitHub Pages app is still a public demo. Do not use its old client-side `#admin` panel to manage private data. The server's protected portal is at `/admin/`.
-- This backend persists custom player records, site settings, and logs, but it does not yet synchronize those records into the browser prediction search/model automatically. That integration is a separate client/API wiring step.
+- The public app reads the custom player list and site settings from safe read-only API endpoints when the backend is available. Prediction events are also written to the server log; offline/static use remains browser-local.
 - Configure a proper HTTPS domain. Session cookies are secure in production and will not work over plain HTTP.
