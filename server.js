@@ -134,6 +134,18 @@ app.post('/api/auth/logout', sameOrigin, requireAdmin, (req, res, next) => req.s
   res.json({ ok: true });
 }));
 
+const publicLogLimiter = rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false });
+app.post('/api/predictions', publicLogLimiter, sameOrigin, (req, res) => {
+  const p = req.body || {};
+  const pred = clean(p.pred, 12);
+  if (!['FWD', 'MID', 'DEF'].includes(pred)) return res.status(400).json({ error: 'Invalid prediction class.' });
+  const result = db.prepare(`INSERT INTO prediction_logs(mode,source,player_name,prediction,confidence,actual,correct)
+    VALUES(?,?,?,?,?,?,?)`).run(clean(p.mode,40),clean(p.source,80),clean(p.name,160),pred,
+      Math.max(0,Math.min(1,Number(p.conf)||0)),p.actual ? clean(p.actual,12) : null,
+      p.correct == null ? null : (p.correct ? 1 : 0));
+  res.status(201).json({ ok: true, id: Number(result.lastInsertRowid) });
+});
+
 app.use('/api/admin', sameOrigin, requireAdmin);
 app.get('/api/admin/players', (_req, res) => res.json(allPlayers.all().map(publicPlayer)));
 app.post('/api/admin/players', (req, res) => {
