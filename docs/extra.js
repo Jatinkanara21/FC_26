@@ -385,6 +385,18 @@
   }
 
   function renderAdmin() {
+    {
+      const root = $("adminRoot");
+      root.innerHTML = `<div class="card login"><h1>🔐 Secure admin requires the server</h1>
+        <p class="hint">The browser-only admin panel has been disabled. Client-side password checks and localStorage cannot protect admin data.</p>
+        <p>Run or deploy the Node server, then open <a href="/admin/">/admin/</a>. The secure portal uses server-side sessions and SQLite persistence.</p>
+        <p class="secnote">For GitHub Pages, the secure admin portal is unavailable because Pages cannot run a backend. Deploy the app as a Node web service using <code>SECURE_ADMIN.md</code>.</p>
+        <p><a href="#simple">← Back to the app</a></p></div>`;
+      fetch("/api/health", { credentials: "same-origin" }).then(r => r.ok ? r.json() : null).then(data => {
+        if (data && data.adminBackend === true) window.location.assign("/admin/");
+      }).catch(() => {});
+      return;
+    }
     const root = $("adminRoot");
     if (!LS.get(KEY.hash, null) && !CFG.adminPasswordSha256) {
       root.innerHTML = `<div class="card login"><h1>🔐 Admin setup required</h1><p class="hint">For safety, this project no longer ships with a known default admin password.</p>
