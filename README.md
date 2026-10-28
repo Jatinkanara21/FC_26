@@ -4,15 +4,13 @@
 
 KANARA JATIN JIJI · Roll No. F10 · Div E · Enrollment No. 24004501210126
 
-[![Train and test](https://github.com/USERNAME/REPO/actions/workflows/train-test.yml/badge.svg)](https://github.com/USERNAME/REPO/actions/workflows/train-test.yml)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/USERNAME/REPO/blob/main/F10_P11_Jatin.ipynb)
-[![Live web app](https://img.shields.io/badge/web%20app-GitHub%20Pages-0b3d2e)](https://USERNAME.github.io/REPO/)
+[![Train and test](https://github.com/Jatinkanara21/FC_26/actions/workflows/train-test.yml/badge.svg)](https://github.com/Jatinkanara21/FC_26/actions/workflows/train-test.yml)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Jatinkanara21/FC_26/blob/main/F10_P11_Jatin.ipynb)
+[![Live web app](https://img.shields.io/badge/web%20app-GitHub%20Pages-0b3d2e)](https://Jatinkanara21.github.io/FC_26/)
 [![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
 
-> Replace `USERNAME` with your GitHub username and `REPO` with the repository name (for example `fc24-position-finder`).
-
 ## Live demo
-- **Web app (runs in the browser, no server):** `https://USERNAME.github.io/REPO/` once GitHub Pages is on (see below)
+- **Web app (runs in the browser, no server):** `https://Jatinkanara21.github.io/FC_26/` once GitHub Pages is on (see below)
 - Preview copy: https://fc24-position-finder.sites.tab.bot/ · Admin: https://fc24-position-finder.sites.tab.bot/#admin
 
 | 🙂 Simple mode (phone) | 🔬 Advanced: compare |
@@ -108,7 +106,7 @@ See [`IMPROVEMENTS.md`](IMPROVEMENTS.md) for the fixes applied, verified test re
 
 ## Run it
 **Colab:** click the badge, then run all. The notebook looks for `male_players.csv`, then `data/fc24_players.csv`. In Colab, either upload Kaggle's `male_players.csv` or run
-`!wget -q https://raw.githubusercontent.com/USERNAME/REPO/main/data/fc24_players.csv`
+`!wget -q https://raw.githubusercontent.com/Jatinkanara21/FC_26/main/data/fc24_players.csv`
 
 **Locally:**
 ```bash
@@ -123,7 +121,7 @@ Open `docs/index.html` in a browser to use the web app offline. It works from di
 **Full Kaggle data:** download `male_players.csv` from https://www.kaggle.com/datasets/stefanoleone992/ea-sports-fc-24-complete-player-dataset and run `python train.py --data male_players.csv`.
 
 ## Deploy
-- **GitHub Pages:** Settings → Pages → Source: *Deploy from a branch* → Branch `main`, folder `/docs` → Save. The link appears there after about a minute: `https://USERNAME.github.io/REPO/`.
+- **GitHub Pages:** Settings → Pages → Source: *Deploy from a branch* → Branch `main`, folder `/docs` → Save. The link appears there after about a minute: `https://Jatinkanara21.github.io/FC_26/`.
 - **Streamlit Community Cloud:** share.streamlit.io → *Create app* → pick this repo, branch `main`, main file `app.py` → *Deploy*. The first load trains the model, which takes about 20 s.
 
 ## How the browser runs the forest
