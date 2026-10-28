@@ -393,3 +393,78 @@ button:disabled{opacity:.5;cursor:not-allowed}
   .try{gap:7px}.try button{padding:0 12px;font-size:.87rem}
 }
 @media(prefers-reduced-motion:reduce){.card,.metric,.chip,.btn,.seg button,.try button{transition:none!important}}
+
+
+/* v3 refinement — clearer hierarchy, softer surfaces and better focus/keyboard states */
+:root{
+  --bg:#f4f7f5;
+  --card:#ffffff;
+  --ink:#12251c;
+  --muted:#596b61;
+  --line:#dfe8e2;
+  --pitch:#073c2d;
+  --pitch2:#0e6848;
+  --accent:#45df86;
+  --r:18px;
+  --sh:0 2px 5px rgba(9,43,29,.04),0 12px 32px rgba(9,43,29,.07);
+}
+body{background:linear-gradient(180deg,#f8faf9 0,#f1f6f3 360px,var(--bg) 100%);letter-spacing:-.005em}
+.wrap{max-width:1240px}
+.topbar{background:rgba(7,60,45,.96);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12)}
+.brand{letter-spacing:-.025em}
+.modeseg{border:1px solid rgba(255,255,255,.2)}
+.modeseg button{transition:background .16s ease,color .16s ease,transform .16s ease}
+.modeseg button:active,.tab:active,.btn:active,.chip:active{transform:translateY(1px)}
+.s-hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 85% 8%,rgba(69,223,134,.24),transparent 34%),radial-gradient(ellipse at 10% 100%,rgba(255,255,255,.08),transparent 38%),linear-gradient(135deg,#062b20 0%,#07533a 56%,#0a6846 100%)}
+.s-hero:after{content:"";position:absolute;right:-110px;bottom:-220px;width:420px;height:420px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 36px rgba(255,255,255,.025),0 0 0 72px rgba(255,255,255,.02);pointer-events:none}
+.s-hero .wrap{position:relative;z-index:1}
+.s-hero h1{letter-spacing:-.045em;font-weight:850;max-width:700px}
+.s-sub{max-width:640px;line-height:1.65;color:#d3f5e2}
+.search.big input{border-radius:16px;box-shadow:0 14px 34px rgba(0,0,0,.2);transition:box-shadow .2s,transform .2s}
+.search.big input:focus{transform:translateY(-1px)}
+.try button{backdrop-filter:blur(8px);border-color:rgba(255,255,255,.24)}
+.card{border-color:rgba(207,222,212,.9);box-shadow:var(--sh);transition:box-shadow .18s,border-color .18s}
+.card:hover{border-color:#cfdfd4}
+.answer.card{background:linear-gradient(145deg,#fff 0,#fbfdfb 100%)}
+.own{position:relative;overflow:hidden}
+.own:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#19a463,#91f4b7);border-radius:4px 0 0 4px}
+.btn,.chip{transition:background .16s,border-color .16s,box-shadow .16s,transform .16s}
+.btn:hover{background:#edf7f0;border-color:#a8cdb5}
+.chip.on{background:linear-gradient(135deg,#073c2d,#0e6848);box-shadow:0 4px 10px rgba(7,60,45,.18)}
+.hero{background:radial-gradient(900px 350px at 85% -10%,rgba(69,223,134,.24),transparent 62%),linear-gradient(145deg,#062b20,#073c2d 58%,#0b6847)}
+.kicker{letter-spacing:.12em}
+.hero .h1{letter-spacing:-.04em}
+.hm{backdrop-filter:blur(12px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.17)}
+.tab{transition:background .16s,color .16s}
+.tab.active{box-shadow:inset 0 3px 0 #19a463}
+.metric{border-radius:16px}
+.metric.main{background:linear-gradient(145deg,#f1fcf5,#fff);border-color:#55b982}
+.result{border-top:3px solid var(--pitch2)}
+.pos #posCode{letter-spacing:-.055em}
+.probBars .bf,.bar .bf,.sure-f{box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+.search input,.filters input,.filters select{border-radius:12px}
+input[type=range]{accent-color:var(--pitch2)}
+input[type=checkbox]{accent-color:var(--pitch2)}
+table tbody tr:hover td{background:#f5faf6}
+.foot{padding-top:24px}
+.foot a{text-decoration-thickness:2px;text-underline-offset:3px}
+:focus-visible{outline-color:#f59e0b;outline-offset:3px}
+@media(max-width:900px){
+  .topin{min-height:64px}
+  .card{padding:16px;border-radius:16px}
+  .s-hero{padding-top:28px}
+}
+@media(max-width:560px){
+  .topin{align-items:center;min-height:62px}
+  .brand{font-size:.94rem;max-width:45vw}
+  .modeseg button{font-size:.82rem;padding:0 10px;min-height:38px}
+  .s-hero{padding:26px 0 24px}
+  .s-hero h1{font-size:clamp(1.75rem,8vw,2.3rem)}
+  .s-sub{font-size:.96rem}
+  .search.big input{font-size:1rem;min-height:56px;padding:14px 16px}
+  .try button{min-height:40px;padding:0 12px}
+  #simpleMain{padding-top:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
