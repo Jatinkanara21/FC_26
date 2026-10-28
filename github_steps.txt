@@ -1,0 +1,45 @@
+FC 24 POSITION FINDER: PUT IT ON GITHUB (about 10 min)
+
+A) MAKE THE REPO
+1. github.com, sign in, then + (top right) → New repository
+2. Name: fc24-position-finder · Public · don't add a README → Create repository
+
+B) UPLOAD THE FILES
+Laptop (easiest):
+3. Unzip FC24_Position_Finder_repo.zip
+4. On the new repo page click "uploading an existing file"
+5. Open the unzipped folder, select EVERYTHING inside it (Ctrl+A) and drag it onto the page.
+   The folders (docs, data, tests) upload too.
+6. Commit changes.
+7. The ".github" folder is hidden, so it may not upload. If the Actions tab is empty:
+   Add file → Create new file → name it  .github/workflows/train-test.yml
+   → paste the text of that file from the zip → Commit.
+   (Or use GitHub Desktop: File → Add local repository → Publish. It uploads hidden folders too.)
+Phone: the GitHub app can't upload folders. Use a laptop or GitHub Desktop.
+
+C) TURN ON THE LIVE WEBSITE
+8. Repo → Settings → Pages
+9. Source: Deploy from a branch · Branch: main · Folder: /docs → Save
+10. Wait 1–2 min and refresh. The link shows at the top:
+    https://USERNAME.github.io/fc24-position-finder/
+
+D) GREEN TICK
+11. Actions tab → "Train and test" runs on every push (about 2 min) → green tick ✅
+
+THE 3 MODES (same link)
+- Simple mode opens first (search a player, make your own player).
+- Advanced: tap "🔬 Advanced" at the top (sliders, why, compare, dashboard, CSV).
+- Admin: add #admin to the link (or tap "Admin" at the bottom). Password: fc24admin
+  Change it: docs/config.js → adminPasswordSha256 (the file explains how).
+  Note: admin data is saved only in your own browser (demo-level, no server).
+
+E) FIX THE BADGES
+12. In README.md (pencil icon), replace USERNAME with your GitHub username and REPO with fc24-position-finder → Commit.
+    The Colab badge then opens the notebook straight from your repo.
+
+F) STREAMLIT APP (optional)
+13. share.streamlit.io → sign in with GitHub → Create app
+14. Repo: fc24-position-finder · Branch: main · Main file: app.py → Deploy
+15. The first load takes about 20 s while it trains. Copy the app link.
+16. Admin password for Streamlit: App → Settings → Secrets → ADMIN_PASSWORD = "your-password"
+    (without it the password is fc24admin). The Simple/Advanced switch is in the sidebar.

@@ -1,0 +1,30 @@
+name: Train and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  train-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Train the Random Forest and re-export the web model
+        run: python train.py
+      - name: Simple-mode mapping, dataset overview, sklearn reference
+        run: python simple_map.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Test (browser model == scikit-learn, simple sliders, admin hash, site files)
+        run: node --test tests/test_site.test.js
+      - name: Smoke test the Streamlit app imports
+        run: python -c "import ast; ast.parse(open('app.py').read()); import train, simple_map; print('ok')"

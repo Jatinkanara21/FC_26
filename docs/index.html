@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FC 24 Position Finder · Random Forest ML Project (P11)</title>
+<meta name="description" content="Move an FC 24 player's ratings and a 200-tree Random Forest predicts FWD, MID or DEF live in your browser. P11 by KANARA JATIN JIJI (F10, Div E).">
+<meta name="theme-color" content="#0b3d2e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-simple">
+<a class="skip" href="#simpleMain">Skip to content</a>
+<div class="banner" id="banner" role="status" hidden></div>
+<div class="topbar">
+  <div class="wrap topin">
+    <a class="brand" href="#simple" id="brand">⚽ <span id="appTitle">FC 24 Position Finder</span></a>
+    <div class="modeseg" role="group" aria-label="Mode">
+      <button type="button" data-mode="simple" aria-pressed="true">🙂 Simple</button>
+      <button type="button" data-mode="advanced" aria-pressed="false">🔬 Advanced</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SIMPLE MODE (default) ================= -->
+<section id="view-simple" class="view" aria-label="Simple mode">
+  <div class="s-hero">
+    <div class="wrap s-narrow">
+      <h1>Where does he really play?</h1>
+      <p class="s-sub">Type any FC 24 player. The computer looks at his ratings and guesses: <b>Forward</b>, <b>Midfielder</b> or <b>Defender</b>.</p>
+      <div class="search big" id="sSearchWrap">
+        <label for="sq" class="sr">Type a player name</label>
+        <input id="sq" type="search" placeholder="🔍 Type a player name" autocomplete="off" spellcheck="false" enterkeyhint="search"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ssugg">
+        <ul id="ssugg" role="listbox" hidden></ul>
+      </div>
+      <div class="try" id="tryChips"><span>Try:</span>
+        <button type="button" data-try="Haaland">Haaland</button><button type="button" data-try="De Bruyne">De Bruyne</button>
+        <button type="button" data-try="Van Dijk">Van Dijk</button><button type="button" data-try="Mbappé">Mbappé</button>
+      </div>
+    </div>
+  </div>
+  <main id="simpleMain" class="wrap s-narrow">
+    <div class="answer card" id="sAnswer" aria-live="polite">
+      <div class="a-empty"><span class="big-emoji">👆</span><p>Pick a player above and the answer shows here.</p></div>
+    </div>
+
+    <div class="card own" id="own">
+      <h2>🛠️ Make your own player</h2>
+      <p class="s-help">Move the sliders. The answer changes as you move.</p>
+      <div class="s-presets" id="sPresets"></div>
+      <div id="sSliders" class="s-sliders"></div>
+      <p class="s-unused" id="sUnused"></p>
+      <div class="answer small" id="oAnswer" aria-live="polite"></div>
+      <details id="sAdv"><summary>🔬 Advanced: see the exact 15 numbers the computer uses</summary><div id="sAdvBody"></div></details>
+    </div>
+
+    <div class="card how">
+      <p><b>💡 How it works:</b> we showed the computer 16,305 real FC 24 players and their positions; it learned which ratings go with which position, like a scout, and now it guesses for any player.</p>
+    </div>
+  </main>
+</section>
+
+<!-- ================= ADVANCED MODE ================= -->
+<section id="view-advanced" class="view" aria-label="Advanced mode" hidden>
+<header class="hero">
+  <div class="wrap hero-in">
+    <div>
+      <p class="kicker">ML Project P11 · Random Forest · Main metric: Macro F1</p>
+      <h2 class="h1">🔬 Advanced mode</h2>
+      <p class="sub">Move a player's ratings and a 200-tree Random Forest, trained on 16,305 real FC 24 players, predicts <b>Forward</b>, <b>Midfielder</b> or <b>Defender</b> live in your browser.</p>
+      <p class="byline">KANARA JATIN JIJI · F10 · Div E · 24004501210126</p>
+    </div>
+    <div class="hero-metrics" id="heroMetrics" aria-label="Test-set results"></div>
+  </div>
+  <nav class="tabs wrap" aria-label="Sections">
+    <button class="tab active" data-tab="predict" aria-selected="true">Predict</button>
+    <button class="tab" data-tab="dashboard" aria-selected="false">Dashboard</button>
+    <button class="tab" data-tab="compare" aria-selected="false">Compare</button>
+    <button class="tab" data-tab="batch" aria-selected="false">CSV batch</button>
+    <button class="tab" data-tab="about" aria-selected="false">How it works</button>
+  </nav>
+</header>
+
+<main id="main" class="wrap advmain">
+  <section id="tab-predict" class="panel active" aria-label="Predict a position">
+    <div class="presets card">
+      <div class="search" id="searchWrap">
+        <label for="q" class="sr">Search a player</label>
+        <input id="q" type="search" placeholder="🔍 Search any FC 24 player, e.g. Haaland" autocomplete="off" spellcheck="false" disabled
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg">
+        <ul id="sugg" role="listbox" hidden></ul>
+      </div>
+      <div class="filters" aria-label="Search filters">
+        <input id="fClub" list="clubList" placeholder="🏟️ Club (any)" autocomplete="off">
+        <input id="fNation" list="nationList" placeholder="🌍 Nation (any)" autocomplete="off">
+        <input id="fMin" type="number" inputmode="numeric" min="40" max="99" placeholder="Min OVR">
+        <input id="fMax" type="number" inputmode="numeric" min="40" max="99" placeholder="Max OVR">
+        <button class="btn" type="button" id="fClear">Clear</button>
+        <datalist id="clubList"></datalist><datalist id="nationList"></datalist>
+        <span class="hint" id="fNote"></span>
+      </div>
+      <div class="row-head"><h2>…or start from a player type</h2><span class="hint">then move any slider</span></div>
+      <div class="chips" id="presets"></div>
+      <div class="real" id="realBox" hidden></div>
+    </div>
+    <div class="grid">
+      <div class="inputs">
+        <div class="card">
+          <div class="row-head">
+            <h2>Main ratings</h2>
+            <label class="switch"><input type="checkbox" id="linkToggle" checked> <span>Move related skills too</span></label>
+          </div>
+          <div id="mainSliders" class="sliders"></div>
+          <div class="gap" id="gapBox"></div>
+        </div>
+        <div class="card" id="groupCards"></div>
+      </div>
+      <aside class="result card" id="result" aria-live="polite">
+        <p class="label">Predicted position</p>
+        <div class="pos" id="posBadge"><span id="posCode">…</span><span id="posName">loading model</span></div>
+        <p class="conf" id="conf"></p>
+        <div class="bars" id="probBars"></div>
+        <div class="why" id="why"></div>
+        <div class="pitch" aria-hidden="true"><div class="zone z-fwd">FWD</div><div class="zone z-mid">MID</div><div class="zone z-def">DEF</div></div>
+        <p class="note" id="modelNote"></p>
+      </aside>
+    </div>
+  </section>
+
+  <section id="tab-dashboard" class="panel" aria-label="Dashboard">
+    <div class="cards4" id="metricCards"></div>
+    <div class="card">
+      <div class="row-head"><h2>Comparison of all settings (test set)</h2><span class="hint" id="bestNote"></span></div>
+      <div class="tbl" id="cmpTable"></div>
+      <div id="cmpBars" class="cmpbars"></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>Confusion matrix · final model</h2><div id="cm"></div><p class="hint">Rows = actual, columns = predicted.</p></div>
+      <div class="card"><h2>ROC curves · one-vs-rest</h2><div id="roc"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>Feature importance · final model</h2><div id="imp"></div><p class="hint">Mean decrease in impurity, all 15 selected features.</p></div>
+      <div class="card"><h2>Dataset</h2><div id="classBars"></div><p class="hint" id="splitNote"></p><h2 class="mt">Average main ratings by class</h2><div id="means"></div></div>
+    </div>
+    <div class="card" id="checkCard"></div>
+  </section>
+
+  <section id="tab-compare" class="panel" aria-label="Compare two players">
+    <div class="card">
+      <div class="row-head"><h2>Compare two players</h2><span class="hint">search both, see ratings on a radar and both predictions</span></div>
+      <div class="cmp2">
+        <div class="search"><label for="qa" class="sr">Player A</label><input id="qa" type="search" placeholder="🟠 Player A, e.g. Haaland" autocomplete="off" spellcheck="false"><ul id="sa" role="listbox" hidden></ul></div>
+        <div class="search"><label for="qb" class="sr">Player B</label><input id="qb" type="search" placeholder="🔵 Player B, e.g. Van Dijk" autocomplete="off" spellcheck="false"><ul id="sb" role="listbox" hidden></ul></div>
+      </div>
+      <div id="cmpOut"></div>
+    </div>
+  </section>
+
+  <section id="tab-batch" class="panel" aria-label="Predict a CSV file">
+    <div class="card">
+      <h2>Predict a whole CSV</h2>
+      <p>Upload Kaggle's <code>male_players.csv</code> (or this repo's <code>data/fc24_players.csv</code>). The page applies the same steps as the notebook (FC 24 rows, goalkeepers out, attack–defence gap added, the 15 selected columns) and predicts every player. The file never leaves your device.</p>
+      <label class="file"><input type="file" id="csvFile" accept=".csv,text/csv"><span>Choose CSV file</span></label>
+      <p class="hint" id="csvStatus"></p>
+      <div id="csvOut"></div>
+    </div>
+  </section>
+
+  <section id="tab-about" class="panel" aria-label="How it works">
+    <div class="card prose">
+      <h2>The 13 steps, in short</h2>
+      <ol class="steps">
+        <li><b>Data</b>: Kaggle “EA Sports FC 24 complete player dataset” (stefanoleone992), <code>male_players.csv</code>, rows with <code>fifa_version == 24</code>.</li>
+        <li><b>Target</b>: first entry of <code>player_positions</code> → FWD (ST, CF, LW, RW, LF, RF) · MID (CM, CDM, CAM, LM, RM) · DEF (CB, LB, RB, LWB, RWB). Goalkeepers dropped.</li>
+        <li><b>Cleaning</b>: duplicates, IDs, names, money/club columns and leaking columns (position ratings, club/nation position, overall, potential) dropped; median / mode fill.</li>
+        <li><b>New feature</b>: <code>attack_defence_gap = (shooting + dribbling) / 2 − defending</code>.</li>
+        <li><b>Encoding + selection</b>: one-hot (<code>get_dummies</code>), then <code>SelectKBest(f_classif, k=15)</code>.</li>
+        <li><b>Split</b>: 80 / 20, <code>stratify=y</code>, <code>random_state=42</code>.</li>
+        <li><b>Model</b>: Random Forest baseline + n_estimators 50 / 100 / 200 + max_depth None / 5 / 10. Best by <b>macro F1</b> → final model.</li>
+        <li><b>Web</b>: <code>train.py</code> exports every tree of the final forest to <code>docs/data/model.js</code>; <code>app.js</code> walks all trees and averages their votes, exactly like scikit-learn's <code>predict_proba</code>.</li>
+      </ol>
+      <h2>Run it yourself</h2>
+      <p>Notebook: <code>F10_P11_Jatin.ipynb</code> (Colab). Retrain + re-export the web model: <code>python train.py</code>. Streamlit version: <code>streamlit run app.py</code>.</p>
+    </div>
+  </section>
+</main>
+</section>
+
+<!-- ================= ADMIN (#admin) ================= -->
+<section id="view-admin" class="view" aria-label="Admin panel" hidden>
+  <div class="wrap" id="adminRoot"></div>
+</section>
+
+<div class="mini hide" id="mini" aria-hidden="true"><span id="miniCode">…</span><span id="miniPct"></span></div>
+<footer class="wrap foot">
+  <p>P11 · FC 24 Position Finder · KANARA JATIN JIJI (F10, Div E) · Random Forest running in plain JavaScript, no server</p>
+  <p><a href="#simple">🙂 Simple</a> · <a href="#predict">🔬 Advanced</a> · <a href="#admin" id="adminLink">🔐 Admin</a></p>
+</footer>
+<script defer src="config.js"></script>
+<script defer src="data/stats.js"></script>
+<script defer src="data/samples.js"></script>
+<script defer src="data/extras.js"></script>
+<script defer src="data/players.js"></script>
+<script defer src="data/model.js"></script>
+<script defer src="extra.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>
