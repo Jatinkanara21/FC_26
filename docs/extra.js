@@ -597,9 +597,29 @@
   // ---------- start ----------
   applySettings();
   route();
+  async function syncServerData() {
+    try {
+      const [playersResponse, settingsResponse] = await Promise.all([
+        fetch("/api/players", { credentials: "same-origin" }),
+        fetch("/api/site-settings", { credentials: "same-origin" })
+      ]);
+      if (playersResponse.ok) {
+        const rows = await playersResponse.json();
+        if (Array.isArray(rows)) { LS.set(KEY.custom, rows); customCache = null; }
+      }
+      if (settingsResponse.ok) {
+        const remote = await settingsResponse.json();
+        if (remote && typeof remote === "object") {
+          LS.set(KEY.settings, Object.assign({}, LS.get(KEY.settings, {}), remote));
+          applySettings();
+        }
+      }
+    } catch (_) { /* Static/offline demo: use browser-local defaults. */ }
+  }
   window.FC24_afterBoot = function () {
     F = window.FC24;
     setupSimple(); setupSimpleSearch(); setupFilters(); setupWhy(); setupCompare();
+    syncServerData();
     if (!$("view-admin").hidden) renderAdmin();
   };
 })();
