@@ -84,11 +84,18 @@
 
   // ---------- prediction log (Admin) ----------
   function logPred(e) {
+    const entry = { t: Date.now(), mode: e.mode, source: e.source, name: e.name || "", x: e.x.map(v => Math.round(v * 100) / 100),
+      pred: e.pred, conf: Math.round(e.conf * 10000) / 10000, actual: e.actual || null, correct: e.actual ? e.actual === e.pred : null };
     const log = LS.get(KEY.log, []);
-    log.push({ t: Date.now(), mode: e.mode, source: e.source, name: e.name || "", x: e.x.map(v => Math.round(v * 100) / 100),
-      pred: e.pred, conf: Math.round(e.conf * 10000) / 10000, actual: e.actual || null, correct: e.actual ? e.actual === e.pred : null });
+    log.push(entry);
     if (log.length > 3000) log.splice(0, log.length - 3000);
     LS.set(KEY.log, log);
+    // If hosted with the Node backend, also persist a minimal event server-side.
+    // Offline/GitHub Pages demo continues to work when this endpoint is absent.
+    fetch("/api/predictions", { method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: entry.mode, source: entry.source, name: entry.name, pred: entry.pred,
+        conf: entry.conf, actual: entry.actual, correct: entry.correct }) }).catch(() => {});
   }
   window.FC24_log = logPred;
 
@@ -385,6 +392,18 @@
   }
 
   function renderAdmin() {
+    {
+      const root = $("adminRoot");
+      root.innerHTML = `<div class="card login"><h1>🔐 Secure admin requires the server</h1>
+        <p class="hint">The browser-only admin panel has been disabled. Client-side password checks and localStorage cannot protect admin data.</p>
+        <p>Run or deploy the Node server, then open <a href="/admin/">/admin/</a>. The secure portal uses server-side sessions and SQLite persistence.</p>
+        <p class="secnote">For GitHub Pages, the secure admin portal is unavailable because Pages cannot run a backend. Deploy the app as a Node web service using <code>SECURE_ADMIN.md</code>.</p>
+        <p><a href="#simple">← Back to the app</a></p></div>`;
+      fetch("/api/health", { credentials: "same-origin" }).then(r => r.ok ? r.json() : null).then(data => {
+        if (data && data.adminBackend === true) window.location.assign("/admin/");
+      }).catch(() => {});
+      return;
+    }
     const root = $("adminRoot");
     if (!LS.get(KEY.hash, null) && !CFG.adminPasswordSha256) {
       root.innerHTML = `<div class="card login"><h1>🔐 Admin setup required</h1><p class="hint">For safety, this project no longer ships with a known default admin password.</p>
@@ -578,9 +597,29 @@
   // ---------- start ----------
   applySettings();
   route();
+  async function syncServerData() {
+    try {
+      const [playersResponse, settingsResponse] = await Promise.all([
+        fetch("/api/players", { credentials: "same-origin" }),
+        fetch("/api/site-settings", { credentials: "same-origin" })
+      ]);
+      if (playersResponse.ok) {
+        const rows = await playersResponse.json();
+        if (Array.isArray(rows)) { LS.set(KEY.custom, rows); customCache = null; }
+      }
+      if (settingsResponse.ok) {
+        const remote = await settingsResponse.json();
+        if (remote && typeof remote === "object") {
+          LS.set(KEY.settings, Object.assign({}, LS.get(KEY.settings, {}), remote));
+          applySettings();
+        }
+      }
+    } catch (_) { /* Static/offline demo: use browser-local defaults. */ }
+  }
   window.FC24_afterBoot = function () {
     F = window.FC24;
     setupSimple(); setupSimpleSearch(); setupFilters(); setupWhy(); setupCompare();
+    syncServerData();
     if (!$("view-admin").hidden) renderAdmin();
   };
 })();
