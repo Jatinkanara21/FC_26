@@ -1,12 +1,22 @@
-name: Train and test
+name: Train, test and deploy
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  train-test:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -15,16 +25,35 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install
-        run: pip install -r requirements.txt
-      - name: Train the Random Forest and re-export the web model
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Train and export the Random Forest
         run: python train.py
-      - name: Simple-mode mapping, dataset overview, sklearn reference
+      - name: Generate simple mode mapping and reference data
         run: python simple_map.py
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Test (browser model == scikit-learn, simple sliders, admin hash, site files)
+      - name: Run automated browser/model tests
         run: node --test tests/test_site.test.js
-      - name: Smoke test the Streamlit app imports
-        run: python -c "import ast; ast.parse(open('app.py').read()); import train, simple_map; print('ok')"
+      - name: Check Python source syntax
+        run: python -m py_compile train.py app.py simple_map.py
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
