@@ -84,11 +84,18 @@
 
   // ---------- prediction log (Admin) ----------
   function logPred(e) {
+    const entry = { t: Date.now(), mode: e.mode, source: e.source, name: e.name || "", x: e.x.map(v => Math.round(v * 100) / 100),
+      pred: e.pred, conf: Math.round(e.conf * 10000) / 10000, actual: e.actual || null, correct: e.actual ? e.actual === e.pred : null };
     const log = LS.get(KEY.log, []);
-    log.push({ t: Date.now(), mode: e.mode, source: e.source, name: e.name || "", x: e.x.map(v => Math.round(v * 100) / 100),
-      pred: e.pred, conf: Math.round(e.conf * 10000) / 10000, actual: e.actual || null, correct: e.actual ? e.actual === e.pred : null });
+    log.push(entry);
     if (log.length > 3000) log.splice(0, log.length - 3000);
     LS.set(KEY.log, log);
+    // If hosted with the Node backend, also persist a minimal event server-side.
+    // Offline/GitHub Pages demo continues to work when this endpoint is absent.
+    fetch("/api/predictions", { method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: entry.mode, source: entry.source, name: entry.name, pred: entry.pred,
+        conf: entry.conf, actual: entry.actual, correct: entry.correct }) }).catch(() => {});
   }
   window.FC24_log = logPred;
 
