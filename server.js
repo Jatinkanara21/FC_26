@@ -80,7 +80,7 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false 
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 app.use(session({
-  name: '__Host-fc26.sid',
+  name: 'fc26.sid',
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -112,6 +112,11 @@ const insertPlayer = db.prepare(`INSERT INTO players(id,short,long,club,nation,o
 const updatePlayer = db.prepare(`UPDATE players SET short=@short,long=@long,club=@club,nation=@nation,ovr=@ovr,pos=@pos,vals_json=@vals_json,updated_at=CURRENT_TIMESTAMP WHERE id=@id`);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'fc26-admin-api', adminBackend: true }));
+app.get('/api/players', (_req, res) => res.json(allPlayers.all().map(publicPlayer)));
+app.get('/api/site-settings', (_req, res) => {
+  const rows = db.prepare('SELECT key,value_json FROM settings').all();
+  res.json(Object.fromEntries(rows.map(r => [r.key, JSON.parse(r.value_json)])));
+});
 app.post('/api/auth/login', loginLimiter, sameOrigin, async (req, res, next) => {
   try {
     const username = clean(req.body.username, 100);
@@ -130,7 +135,7 @@ app.post('/api/auth/login', loginLimiter, sameOrigin, async (req, res, next) => 
 app.get('/api/auth/me', requireAdmin, (req, res) => res.json({ ok: true, username: req.session.username }));
 app.post('/api/auth/logout', sameOrigin, requireAdmin, (req, res, next) => req.session.destroy(err => {
   if (err) return next(err);
-  res.clearCookie('__Host-fc26.sid', { path: '/', httpOnly: true, secure: production, sameSite: 'strict' });
+  res.clearCookie('fc26.sid', { path: '/', httpOnly: true, secure: production, sameSite: 'strict' });
   res.json({ ok: true });
 }));
 
