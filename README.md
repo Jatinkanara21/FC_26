@@ -127,3 +127,13 @@ Open `docs/index.html` in a browser to use the web app offline. It works from di
 ## How the browser runs the forest
 `train.py` writes every tree in pre-order (one byte per node: the feature index, or `128 + class` for a leaf, then the split threshold), gzips it and stores it as base64 in `docs/data/model_data_*.js` (~1 MB for 200 trees). `app.js` unpacks it with the browser's built-in `DecompressionStream` and, for a player, walks all 200 trees (`x[feature] <= threshold` → left, else right) and averages the leaf votes, exactly like scikit-learn's `predict_proba`.
 "# FC_26" 
+
+
+## Secure admin backend (new)
+
+The static GitHub Pages admin has been disabled because client-side authentication cannot protect data. A server-backed portal is provided at `/admin/` when running the Node server. It uses bcrypt password verification, server-side SQLite sessions, rate-limited login, protected API routes, and SQLite persistence for custom players, site settings, and prediction logs.
+
+- Read [SECURE_ADMIN.md](SECURE_ADMIN.md) before deploying.
+- Local setup: `npm install`, set `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and a random `SESSION_SECRET`, then run `npm start`.
+- Hosting: `render.yaml` is a starting point for a Node service with a persistent disk. Set secrets in the host dashboard; never commit real credentials.
+- GitHub Pages remains a public static demo and cannot host the protected admin backend. Deploy the Node service to use secure admin features.
