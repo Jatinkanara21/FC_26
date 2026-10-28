@@ -34,8 +34,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Install backend dependencies
+        run: npm install
       - name: Run automated browser/model tests
         run: node --test tests/test_site.test.js
+      - name: Test secure admin backend
+        run: npm run test:server
       - name: Check Python source syntax
         run: python -m py_compile train.py app.py simple_map.py
 
