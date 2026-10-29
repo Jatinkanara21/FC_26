@@ -135,5 +135,5 @@ The static GitHub Pages admin has been disabled because client-side authenticati
 
 - Read [SECURE_ADMIN.md](SECURE_ADMIN.md) before deploying.
 - Local setup: `npm install`, set `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and a random `SESSION_SECRET`, then run `npm start`.
-- Hosting: `render.yaml` is a starting point for a Node service with a persistent disk. Set secrets in the host dashboard; never commit real credentials.
+- Hosting: deploy the Node service on a platform that supports persistent storage for SQLite. Configure `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, and a strong `SESSION_SECRET` in the host dashboard; never commit real credentials.
 - GitHub Pages remains a public static demo and cannot host the protected admin backend. Deploy the Node service to use secure admin features.
