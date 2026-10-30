@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FC 24 – Find One Player (ML)</title>
+<meta property="og:title" content="FC 24 – Find One Player (Random Forest ML)">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Poppins,system-ui,sans-serif;color:#E8F1FF;min-height:100vh;
+background:linear-gradient(135deg,#0B1530,#132A55 55%,#0E3B4A);display:flex;justify-content:center;padding:24px 14px}
+.card{width:100%;max-width:560px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:22px;backdrop-filter:blur(10px)}
+h1{margin:0 0 4px;font-size:24px}p.s{margin:0 0 18px;color:#9FB3D1;font-size:14px}
+.row{display:flex;gap:8px}input{flex:1;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;font-size:16px}
+button{padding:14px 18px;border:0;border-radius:12px;background:#38BDF8;color:#04223A;font-weight:700;font-size:16px;cursor:pointer}button:disabled{opacity:.5}
+#status{margin:14px 0 0;font-size:13px;color:#FBBF24}#out{margin-top:16px}
+.res{background:rgba(0,0,0,.25);border-radius:14px;padding:16px;line-height:1.7}.res b{color:#38BDF8}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:700}.FWD{background:#F472B6;color:#3a0420}.MID{background:#34D399;color:#05301f}.DEF{background:#A78BFA;color:#1d0b45}
+details{margin-top:18px;font-size:12px;color:#9FB3D1}pre{white-space:pre-wrap;background:rgba(0,0,0,.3);padding:10px;border-radius:10px;font-size:11px;color:#cfe3ff}
+.ok{color:#34D399}.no{color:#F87171}
+</style></head><body><div class="card">
+<h1>⚽ Find One Player</h1><p class="s">FC 24 · Random Forest predicts FWD / MID / DEF from pace, shooting, passing, dribbling, defending, physic</p>
+<div class="row"><input id="q" placeholder="Player name e.g. Messi" disabled><button id="go" disabled>Find</button></div>
+<div id="status">Loading Python + training the model… (first time ~20–40 s)</div>
+<div id="out"></div>
+<details><summary>Python code running on this page (find_player.py)</summary><pre id="code"></pre></details>
+</div>
+<script>
+const PY = "import pandas as pd\nfrom sklearn.ensemble import RandomForestClassifier\n\ndf = pd.read_csv(\"data/fc24_players.csv\", low_memory=False)\ndf = df[df.fifa_version == 24].drop_duplicates(\"player_id\")\npos = {\"ST\":\"FWD\",\"CF\":\"FWD\",\"LW\":\"FWD\",\"RW\":\"FWD\",\"CM\":\"MID\",\"CDM\":\"MID\",\"CAM\":\"MID\",\"LM\":\"MID\",\"RM\":\"MID\",\n       \"CB\":\"DEF\",\"LB\":\"DEF\",\"RB\":\"DEF\",\"LWB\":\"DEF\",\"RWB\":\"DEF\"}\ndf[\"group\"] = df.player_positions.str.split(\",\").str[0].map(pos)\ndf = df.dropna(subset=[\"group\"])\nf = [\"pace\",\"shooting\",\"passing\",\"dribbling\",\"defending\",\"physic\"]\nmodel = RandomForestClassifier(random_state=42).fit(df[f], df.group)\n\nname = input(\"Player name: \")\nfound = df[df.long_name.str.contains(name, case=False) | df.short_name.str.contains(name, case=False)]\nif found.empty:\n    print(\"Player not found\")\nelse:\n    p = found.sort_values(\"overall\").iloc[-1]\n    print(p.long_name, \"| Real:\", p.player_positions, \"| Predicted:\", model.predict(df.loc[[p.name], f])[0])\n";
+document.getElementById('code').textContent = PY;
+let py, findFn;
+(async()=>{
+  const st=document.getElementById('status');
+  try{
+    py = await loadPyodide();
+    st.textContent='Loading pandas + scikit-learn…';
+    await py.loadPackage(['pandas','scikit-learn']);
+    st.textContent='Downloading 18,350 players…';
+    const csv = await (await fetch('find_player_players.csv')).text();
+    py.FS.writeFile('/home/pyodide/players.csv', csv);
+    st.textContent='Training Random Forest…';
+    // same code as find_player.py, with input() replaced by a function
+    const train = PY.split('name = input')[0].replace('data/fc24_players.csv','/home/pyodide/players.csv');
+    await py.runPythonAsync(train + `
+def find(name):
+    found = df[df.long_name.str.contains(name, case=False, regex=False) | df.short_name.str.contains(name, case=False, regex=False)]
+    if found.empty:
+        return None
+    p = found.sort_values("overall").iloc[-1]
+    return [p.long_name, str(p.club_name), int(p.overall), p.player_positions, p.group, model.predict(df.loc[[p.name], f])[0]]
+`);
+    findFn = py.globals.get('find');
+    st.textContent='Ready ✅ Type a name and press Find';
+    ['q','go'].forEach(i=>document.getElementById(i).disabled=false);
+    document.getElementById('q').focus();
+  }catch(e){st.textContent='Error: '+(e.message||e); console.log('ERR', e.message||String(e));}
+})();
+function run(){
+  const n=document.getElementById('q').value.trim(); if(!n) return;
+  const r=findFn(n); const o=document.getElementById('out');
+  if(!r){o.innerHTML='<div class="res">Player not found</div>';return;}
+  const [ln,club,ov,real,grp,pred]=r.toJs(); r.destroy();
+  const ok=grp===pred;
+  o.innerHTML=`<div class="res"><b>${ln}</b><br>${club} · Overall ${ov}<br>Real: ${real} → <span class="tag ${grp}">${grp}</span><br>Predicted: <span class="tag ${pred}">${pred}</span> <span class="${ok?'ok':'no'}">${ok?'✔ correct':'✘ different'}</span></div>`;
+}
+document.getElementById('go').onclick=run;
+document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')run();});
+</script></body></html>
